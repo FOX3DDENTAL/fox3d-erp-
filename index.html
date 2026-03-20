@@ -511,7 +511,6 @@ function go(page){
   var btns=document.querySelectorAll('.nav-btn');
   if(btns[idx[page]])btns[idx[page]].classList.add('active');
   filtered=production.slice();
-  prod_page=0;
   render();
   closeDetail();
   document.getElementById('cmd-badge').textContent=commandes.length;
@@ -533,7 +532,6 @@ function applyFilters(){
     if(q&&!(p.num+p.type+p.teinte+p.commentaires+'').toLowerCase().includes(q))return false;
     return true;
   });
-  prod_page=0;
   renderTable();
 }
 
@@ -591,6 +589,7 @@ function renderProd(){
   var ops=[...new Set(production.map(function(p){return p.operateur}).filter(Boolean))].sort();
   var teintes=[...new Set(production.map(function(p){return p.teinte}).filter(Boolean))].sort();
   filtered=production.slice();
+  prod_page=Math.max(0,Math.ceil(filtered.length/PERPAGE)-1);
 
   document.getElementById('content').innerHTML='<div class="card">'+
     '<div class="card-head"><div class="card-title">Suivi de production \u2014 '+production.length+' pièces</div>'+
@@ -611,11 +610,16 @@ function renderProd(){
     '<button class="btn btn-sm" onclick="exportCSV()" style="margin-left:4px">\u21D3 CSV</button></div>'+
   '</div>';
   applyFilters();
+  prod_page=Math.max(0,Math.ceil(filtered.length/PERPAGE)-1);
+  renderTable();
 }
 
 function syncSearch(v){document.getElementById('gsearch').value=v;applyFilters();}
 
 function renderTable(){
+  var pages2=Math.ceil(filtered.length/PERPAGE)||1;
+  if(prod_page>=pages2)prod_page=pages2-1;
+  if(prod_page<0)prod_page=0;
   var s=prod_page*PERPAGE,e=Math.min(s+PERPAGE,filtered.length);
   var slice=filtered.slice(s,e);
   var pages=Math.ceil(filtered.length/PERPAGE)||1;
